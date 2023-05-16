@@ -11,26 +11,26 @@ func main() {
 	app := &cli.App{
 		Commands: []*cli.Command{
 			{
-				Name:  "hide",
-				Usage: "Hide all file names",
+				Name:   "hide",
+				Usage:  "Hide all file names",
+				Action: hide,
 				Flags: []cli.Flag{
 					&cli.PathFlag{
 						Name:        "path",
 						DefaultText: ".",
 					},
 				},
-				Action: hide,
 			},
 			{
-				Name:  "show",
-				Usage: "Show all file names",
+				Name:   "show",
+				Usage:  "Show all file names",
+				Action: show,
 				Flags: []cli.Flag{
 					&cli.PathFlag{
 						Name:        "path",
 						DefaultText: ".",
 					},
 				},
-				Action: show,
 			},
 		},
 	}

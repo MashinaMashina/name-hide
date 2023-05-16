@@ -42,8 +42,8 @@ func hide(c *cli.Context) error {
 		return fmt.Errorf("too many links")
 	}
 
-	db, err := InitDatabase(path)
-	if err != nil {
+	db := NewDatabase(path)
+	if err = db.Init(); err != nil {
 		return fmt.Errorf("open db: %w", err)
 	}
 	defer db.Close()
@@ -58,16 +58,16 @@ func hide(c *cli.Context) error {
 			continue
 		}
 
-		num, err := db.GetUnusedNum()
+		spaces, err := db.GetUnusedNum()
 		if err != nil {
 			return fmt.Errorf("generating name: %w", err)
 		}
 
-		if num > maxNameLength {
-			return fmt.Errorf("can not create too long name: %d chars", num)
+		if spaces > maxNameLength {
+			return fmt.Errorf("can not create too long name: %d chars", spaces)
 		}
 
-		name := strings.Repeat(string(hideChar), num)
+		name := strings.Repeat(string(hideChar), spaces)
 
 		oldPath := fmt.Sprintf("%s/%s", path, file.Name())
 		newPath := fmt.Sprintf("%s/%s.lnk", path, name)
@@ -76,9 +76,11 @@ func hide(c *cli.Context) error {
 			return fmt.Errorf("rename '%s': %w", file.Name(), err)
 		}
 
-		if err = db.SaveName(file.Name(), num); err != nil {
-			return fmt.Errorf("save name '%s' as %d: %w", file.Name(), num, err)
+		if err = db.SaveName(file.Name(), spaces); err != nil {
+			return fmt.Errorf("save name '%s' as %d: %w", file.Name(), spaces, err)
 		}
+
+		fmt.Printf("%s renamed to %d spaces\n", file.Name(), spaces)
 	}
 
 	return nil
