@@ -92,11 +92,9 @@ func (d *Database) SaveName(originalName string, num int) error {
 }
 
 func (d *Database) FreeNum(num int) error {
-	if _, err := d.db.Exec("delete from names where space_count=$1", num); err != nil {
-		return err
-	}
+	_, err := d.db.Exec("delete from names where space_count=$1", num)
 
-	return nil
+	return err
 }
 
 func (d *Database) List() (List, error) {
@@ -118,4 +116,10 @@ func (d *Database) List() (List, error) {
 	}
 
 	return res, err
+}
+
+func (d *Database) FreeSpace() error {
+	_, err := d.db.Exec("vacuum")
+
+	return err
 }

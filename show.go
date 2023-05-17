@@ -35,18 +35,19 @@ func show(c *cli.Context) error {
 		return fmt.Errorf("list directory: %w", err)
 	}
 
-	extLength := utf8.RuneCountInString(LnkExt)
 	for _, file := range files {
-		if filepath.Ext(file.Name()) != LnkExt {
+		ext := filepath.Ext(file.Name())
+		if !ExtAvailable(ext) {
 			continue
 		}
 
-		// В имени файла посторонние символы - файл не скрывался
-		if strings.TrimLeft(file.Name(), string(hideChar)) != LnkExt {
+		filename := strings.TrimSuffix(file.Name(), ext)
+		if strings.TrimLeft(filename, string(hideChar)) != "" {
+			// В имени файла посторонние символы - файл не скрывался
 			continue
 		}
 
-		spaces := utf8.RuneCountInString(file.Name()) - extLength
+		spaces := utf8.RuneCountInString(file.Name()) - len(ext)
 
 		name, err := list.GetName(spaces)
 		if err != nil {
@@ -67,5 +68,5 @@ func show(c *cli.Context) error {
 		fmt.Printf("%d spaces renamed to %s\n", spaces, name)
 	}
 
-	return nil
+	return db.FreeSpace()
 }

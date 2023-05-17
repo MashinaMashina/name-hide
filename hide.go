@@ -11,8 +11,7 @@ import (
 
 const (
 	hideChar      = rune(160)
-	maxNameLength = 251
-	LnkExt        = ".lnk"
+	maxNameLength = 255
 )
 
 func hide(c *cli.Context) error {
@@ -28,7 +27,9 @@ func hide(c *cli.Context) error {
 
 	count := 0
 	for _, file := range files {
-		if filepath.Ext(file.Name()) == LnkExt {
+		fmt.Println(file.Name())
+
+		if ExtAvailable(filepath.Ext(file.Name())) {
 			count++
 		}
 	}
@@ -49,12 +50,15 @@ func hide(c *cli.Context) error {
 	defer db.Close()
 
 	for _, file := range files {
-		if filepath.Ext(file.Name()) != LnkExt {
+		ext := filepath.Ext(file.Name())
+		if !ExtAvailable(ext) {
+			fmt.Printf("file '%s' has not have extension '%s'\n", file.Name(), LnkExt)
 			continue
 		}
 
-		// файл уже скрыт
-		if strings.TrimLeft(file.Name(), string(hideChar)) == LnkExt {
+		filename := strings.TrimSuffix(file.Name(), ext)
+		if strings.TrimLeft(filename, string(hideChar)) == "" {
+			// файл уже скрыт
 			continue
 		}
 
@@ -63,14 +67,14 @@ func hide(c *cli.Context) error {
 			return fmt.Errorf("generating name: %w", err)
 		}
 
-		if spaces > maxNameLength {
+		if spaces+len(ext) > maxNameLength {
 			return fmt.Errorf("can not create too long name: %d chars", spaces)
 		}
 
 		name := strings.Repeat(string(hideChar), spaces)
 
 		oldPath := fmt.Sprintf("%s/%s", path, file.Name())
-		newPath := fmt.Sprintf("%s/%s.lnk", path, name)
+		newPath := fmt.Sprintf("%s/%s%s", path, name, ext)
 
 		if err = os.Rename(oldPath, newPath); err != nil {
 			return fmt.Errorf("rename '%s': %w", file.Name(), err)
