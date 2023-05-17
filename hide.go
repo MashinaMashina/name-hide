@@ -27,8 +27,6 @@ func hide(c *cli.Context) error {
 
 	count := 0
 	for _, file := range files {
-		fmt.Println(file.Name())
-
 		if ExtAvailable(filepath.Ext(file.Name())) {
 			count++
 		}
@@ -52,7 +50,7 @@ func hide(c *cli.Context) error {
 	for _, file := range files {
 		ext := filepath.Ext(file.Name())
 		if !ExtAvailable(ext) {
-			fmt.Printf("file '%s' has not have extension '%s'\n", file.Name(), LnkExt)
+			fmt.Printf("file '%s' not have extension '%s'\n", file.Name(), LnkExt)
 			continue
 		}
 
